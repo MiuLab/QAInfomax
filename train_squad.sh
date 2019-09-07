@@ -1,7 +1,7 @@
 export SQUAD_DIR=squad
 export SQUAD_ADV=squad_adv
 
-python3 run_squad.py \
+CUDA_VISIBLE_DEVICES=2 python3 run_squad.py \
   --bert_model bert-base-uncased \
   --do_train \
   --do_predict \
@@ -14,6 +14,4 @@ python3 run_squad.py \
   --max_seq_length 384 \
   --doc_stride 128 \
   --output_dir squad_info_output \
-  --seed 10040
-  #--freeze_train
-  #--fp16
+  --seed 5555

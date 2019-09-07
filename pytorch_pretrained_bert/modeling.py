@@ -842,7 +842,8 @@ class BertForQuestionAnswering(BertPreTrainedModel):
                 a_enc_fake = a_fake[0, rand_idx, :]
                 local_loss = local_loss + self.local_infomax(a_enc_word.unsqueeze(0), a_enc_fake.unsqueeze(0), a_enc, a_fake, do_summarize=False)
 
-            info_loss = (0.5 * global_loss + local_loss) / (len(ans_enc) * 3.5)
+            info_loss = (0.5 * global_loss + local_loss) / len(ans_enc)
+            info_loss = 0.25 * info_loss
 
             loss_fct = CrossEntropyLoss(ignore_index=ignored_index)
             start_loss = loss_fct(start_logits, start_positions)
