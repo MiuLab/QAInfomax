@@ -1,7 +1,7 @@
 # QAInfomax  
 *An implementation of the [QAInfomax: Learning Robust Question Answering System by Mutual Information Maximization](https://arxiv.org/abs/1909.00215)*
 
-# Requirements
+## Requirements
 
 python 3.7
 
@@ -9,20 +9,20 @@ python 3.7
 pip install -r requirement.txt
 ```
 
-# Train:
+## Train:
 
 ```
-sh train.sh
+sh train_squad.sh
 ```
 
-# Evaluation:
+## Evaluation:
 
 ```
 cd squad_adv
 sh eval_adv.sh
 ```
 
-# Reference 
+## Reference 
 
 Main paper to be cited
 

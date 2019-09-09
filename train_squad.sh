@@ -1,7 +1,7 @@
 export SQUAD_DIR=squad
 export SQUAD_ADV=squad_adv
 
-CUDA_VISIBLE_DEVICES=2 python3 run_squad.py \
+python3 run_squad.py \
   --bert_model bert-base-uncased \
   --do_train \
   --do_predict \
