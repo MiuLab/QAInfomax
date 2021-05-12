@@ -709,7 +709,7 @@ class BertModel(BertPreTrainedModel):
         # positions we want to attend and -10000.0 for masked positions.
         # Since we are adding it to the raw scores before the softmax, this is
         # effectively the same as removing these entirely.
-        extended_attention_mask = extended_attention_mask.to(dtype=next(self.parameters()).dtype) # fp16 compatibility
+        extended_attention_mask = extended_attention_mask.to(dtype=torch.float32) # fp16 compatibility
         extended_attention_mask = (1.0 - extended_attention_mask) * -10000.0
 
         embedding_output = self.embeddings(input_ids, token_type_ids)
@@ -841,7 +841,7 @@ class BertForQuestionAnswering(BertPreTrainedModel):
                 rand_idx = np.random.randint(a_fake.size(1))
                 a_enc_fake = a_fake[0, rand_idx, :]
                 local_loss = local_loss + self.local_infomax(a_enc_word.unsqueeze(0), a_enc_fake.unsqueeze(0), a_enc, a_fake, do_summarize=False)
-
+            
             info_loss = (0.5 * global_loss + local_loss) / len(ans_enc)
             info_loss = 0.25 * info_loss
 
@@ -849,6 +849,7 @@ class BertForQuestionAnswering(BertPreTrainedModel):
             start_loss = loss_fct(start_logits, start_positions)
             end_loss = loss_fct(end_logits, end_positions)
             total_loss = (start_loss + end_loss + info_loss) / 3
+            #print('total_loss',total_loss,'info_loss',info_loss)
             return total_loss, info_loss
         else:
             return start_logits, end_logits, sequence_output
