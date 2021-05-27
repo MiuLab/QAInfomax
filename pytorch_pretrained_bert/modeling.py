@@ -776,7 +776,8 @@ class BertForQuestionAnswering(BertPreTrainedModel):
         # TODO check with Google if it's normal there is no dropout on the token classifier of SQuAD in the TF version
         # self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.qa_outputs = nn.Linear(config.hidden_size, 2)
-        
+       
+        #### insert smile-mi-estimator? (#rsk) 
         self.global_infomax = SquadDIMLoss(config.hidden_size) # GC
         self.local_infomax = SquadDIMLoss(config.hidden_size) # LC
 
@@ -818,7 +819,7 @@ class BertForQuestionAnswering(BertPreTrainedModel):
                 extend_end = min(sequence_output.size(1), end_positions[b_idx] + 5)
                 ans_seq = sequence_output[b_idx, extend_start : extend_end, :] # (seq, hidden_size)
                 ans_enc.append(ans_seq.unsqueeze(0))
-            assert len(ans_enc) == len(context_enc)            
+            assert len(ans_enc) == len(context_enc)         
 
             # generate fake examples by shifting one index.
             context_fake = [context_enc[-1]] + context_enc[:-1]
@@ -831,10 +832,10 @@ class BertForQuestionAnswering(BertPreTrainedModel):
                 c_enc, c_fake = context_enc[b_idx], context_fake[b_idx]
                 a_enc, a_fake = ans_enc[b_idx], ans_fake[b_idx]
                 
-                ## Compute GC ##
+                ## Compute GC ## Change to smile (#rsk)
                 global_loss = global_loss + self.global_infomax(a_enc, a_fake, c_enc, c_fake, do_summarize=True)
                 
-                ## Compute LC ##
+                ## Compute LC ## Change to smile (#rsk)
                 # sample one
                 rand_idx = np.random.randint(a_enc.size(1))
                 a_enc_word = a_enc[0, rand_idx, :]
@@ -842,9 +843,11 @@ class BertForQuestionAnswering(BertPreTrainedModel):
                 a_enc_fake = a_fake[0, rand_idx, :]
                 local_loss = local_loss + self.local_infomax(a_enc_word.unsqueeze(0), a_enc_fake.unsqueeze(0), a_enc, a_fake, do_summarize=False)
             
+            # Info loss
             info_loss = (0.5 * global_loss + local_loss) / len(ans_enc)
             info_loss = 0.25 * info_loss
 
+            # total loss
             loss_fct = CrossEntropyLoss(ignore_index=ignored_index)
             start_loss = loss_fct(start_logits, start_positions)
             end_loss = loss_fct(end_logits, end_positions)
