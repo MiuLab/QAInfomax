@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from smile.estimators import smile_lower_bound
 
 class SquadDiscriminator(nn.Module):
     def __init__(self, feature_size):
@@ -64,27 +63,26 @@ class SquadDIMLoss(nn.Module):
         y_enc = self.dropout(y_enc)
         logits = self.discriminator(x_enc, y_enc)
         batch_size1, n_seq1 = y_enc.size(0), y_enc.size(1)
-        # labels = torch.ones(batch_size1, n_seq1)
+        labels = torch.ones(batch_size1, n_seq1)
 
         # Compute g(x, y^(\bar))
         y_fake = self.dropout(y_fake)
         _logits = self.discriminator(x_enc, y_fake)
         batch_size2, n_seq2 = y_fake.size(0), y_fake.size(1)
-        # _labels = torch.zeros(batch_size2, n_seq2)
+        _labels = torch.zeros(batch_size2, n_seq2)
         
         logits = torch.cat((logits, _logits), dim=1)
 
-        # Compute g(x^(\bar), y)
+        # Compute 1 - g(x^(\bar), y)
         if do_summarize:
             x_fake = self.summarize(x_fake)
         x_fake = self.dropout(x_fake)
         _logits = self.discriminator(x_fake, y_enc)
-        # _labels = torch.zeros(batch_size1, n_seq1)
+        _labels = torch.zeros(batch_size1, n_seq1)
         
         logits = torch.cat((logits, _logits), dim=1)
         
-        # loss = self.bce_loss(logits.squeeze(2), labels.cuda())
-        loss = self.smile_lower_bound(logits.squeeze(2))
+        loss = self.bce_loss(logits.squeeze(2), labels.cuda())
 
         return loss
 
