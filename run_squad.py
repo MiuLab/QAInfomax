@@ -990,19 +990,21 @@ def main():
                 if n_gpu == 1:
                     batch = tuple(t.to(device) for t in batch) # multi-gpu does scattering it-self
                 input_ids, input_mask, segment_ids, start_positions, end_positions = batch
-                
+                 
                 loss, info_loss = model(input_ids, segment_ids, input_mask, start_positions, end_positions)
+                #print('total_loss',loss,'info_loss',info_loss)
                 if n_gpu > 1:
                     loss = loss.mean() # mean() to average on multi-gpu.
+                    info_loss = info_loss.mean()
                 if args.gradient_accumulation_steps > 1:
                     loss = loss / args.gradient_accumulation_steps
-                
                 if args.fp16:
                     optimizer.backward(loss)
                 else:
                     loss.backward()
                 if step % 50 == 0:
-                    tqdm.write('Total Loss:{} Info Loss: {}'.format(loss.item(), info_loss.item()))
+                    #print('total_loss',loss,'info_loss',info_loss)
+                    tqdm.write('Total Loss:{0} Info Loss: {1}'.format(loss.item(), info_loss.item()))
                 if (step + 1) % args.gradient_accumulation_steps == 0:
                     if args.fp16:
                         # modify learning rate with special warm up BERT uses
